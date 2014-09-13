@@ -8,6 +8,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import our.memo.editor.EditNoteActivity;
+
 public class MyActivity extends Activity {
     /**
      * Called when the activity is first created.
@@ -33,7 +35,7 @@ public class MyActivity extends Activity {
 
         switch(item.getItemId()) {
             case R.id.action_add:
-                Intent intent = new Intent(this, EditNote.class);
+                Intent intent = new Intent(this, EditNoteActivity.class);
                 startActivity(intent);
                 return true;
             default:

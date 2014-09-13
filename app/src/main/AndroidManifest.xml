@@ -10,7 +10,7 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".EditNote"
+        <activity android:name=".editor.EditNoteActivity"
             android:parentActivityName=".MyActivity">
         </activity>
     </application>
