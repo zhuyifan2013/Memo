@@ -11,14 +11,23 @@ import our.memo.R;
  */
 public class EditNoteActivity extends Activity {
 
+    private EditeNoteFragment mEditeNoteFragment;
+    private ActionBar mActionBar;
+
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-
-        ActionBar actionBar = getActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-
         setContentView(R.layout.edit_notes);
+
+        mEditeNoteFragment = EditeNoteFragment.newInstance();
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.container, mEditeNoteFragment)
+                    .commit();
+        }
+
+        mActionBar= getActionBar();
+        mActionBar.setDisplayHomeAsUpEnabled(true);
     }
 
 }
