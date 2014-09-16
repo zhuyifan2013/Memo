@@ -29,6 +29,13 @@ public class EditeNoteFragment extends Fragment {
     private Context mContext;
     private View view;
 
+    public static EditeNoteFragment newInstance() {
+        EditeNoteFragment fragment = new EditeNoteFragment();
+        return fragment;
+    }
+
+    public EditeNoteFragment() {}
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
