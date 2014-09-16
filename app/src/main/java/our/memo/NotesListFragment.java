@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
-import our.memo.data.NoteAdapter;
+import our.memo.editor.NoteAdapter;
 import our.memo.data.NoteDbHelper;
 import our.memo.data.NoteItem;
 

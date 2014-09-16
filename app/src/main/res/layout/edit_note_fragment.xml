@@ -14,5 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/edit_text_note"
-            android:hint="记点什么吧..." android:password="false" android:gravity="start"/>
+            android:hint="@string/edit_text_note_hint"
+            android:password="false"
+            android:gravity="start"/>
 </LinearLayout>

@@ -1,4 +1,4 @@
-package our.memo;
+package our.memo.editor;
 
 import android.app.Fragment;
 import android.content.ContentValues;
@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import our.memo.R;
 import our.memo.data.NoteDbHelper;
 
 import java.text.SimpleDateFormat;
@@ -26,6 +28,13 @@ import static our.memo.data.NoteDataContract.NoteEntry;
 public class EditeNoteFragment extends Fragment {
     private Context mContext;
     private View view;
+
+    public static EditeNoteFragment newInstance() {
+        EditeNoteFragment fragment = new EditeNoteFragment();
+        return fragment;
+    }
+
+    public EditeNoteFragment() {}
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
