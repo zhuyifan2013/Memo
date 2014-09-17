@@ -4,6 +4,7 @@ import android.provider.BaseColumns;
 
 /**
  * Created by yifan on 14-9-2.
+ * Email: zhuyifan@xiaomi.com
  */
 public final class NoteDataContract {
     public NoteDataContract(){}

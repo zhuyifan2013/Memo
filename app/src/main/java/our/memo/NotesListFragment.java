@@ -3,6 +3,7 @@ package our.memo;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -12,7 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
+
+import our.memo.editor.EditNoteActivity;
 import our.memo.editor.NoteAdapter;
 import our.memo.data.NoteDbHelper;
 import our.memo.data.NoteItem;
@@ -88,7 +90,9 @@ public class NotesListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 NoteItem ni = (NoteItem)parent.getItemAtPosition(position);
-                Toast.makeText(mContext,"这个item的内容为"+ni.getContent(),Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(mContext,EditNoteActivity.class);
+                intent.putExtra(NoteEntry._ID, ni.get_ID());
+                startActivity(intent);
             }
         });
         mAdapter.notifyDataSetChanged();

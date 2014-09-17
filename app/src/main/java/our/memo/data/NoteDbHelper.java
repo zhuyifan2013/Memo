@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 /**
  * Created by yifan on 14-9-3.
+ * Email: zhuyifan@xiaomi.com
  */
 public class NoteDbHelper extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;

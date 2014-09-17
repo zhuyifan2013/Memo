@@ -1,8 +1,9 @@
 package our.memo.editor;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.ContentValues;
-import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,8 +15,10 @@ import android.widget.TextView;
 
 import our.memo.R;
 import our.memo.data.NoteDbHelper;
+import our.memo.data.NoteItem;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -26,12 +29,12 @@ import static our.memo.data.NoteDataContract.NoteEntry;
  * E-mail: zhuyifan@xiaomi.com
  */
 public class EditeNoteFragment extends Fragment {
-    private Context mContext;
+    private Activity mContext;
     private View view;
+    private  NoteItem note = null;
 
     public static EditeNoteFragment newInstance() {
-        EditeNoteFragment fragment = new EditeNoteFragment();
-        return fragment;
+        return new EditeNoteFragment();
     }
 
     public EditeNoteFragment() {}
@@ -87,9 +90,50 @@ public class EditeNoteFragment extends Fragment {
     }
 
     public void init(View view) {
-
+        Bundle bundle = mContext.getIntent().getExtras();
         TextView text_date = (TextView)view.findViewById(R.id.current_date);
-        text_date.setText(currentTime());
+        TextView text_content = (TextView)view.findViewById(R.id.edit_text_note);
+        if(bundle == null){
+            text_date.setText(currentTime());
+        } else {
+            String id = bundle.getString(NoteEntry._ID);
+            NoteItem note = getData(id);
+            text_date.setText(note.getUpdate_time());
+            text_content.setText(note.getContent());
+        }
+    }
+
+    private NoteItem getData(String id) {
+        Cursor mCursor;
+        NoteItem note = new NoteItem();
+        NoteDbHelper mDbHelper = new NoteDbHelper(mContext);
+        SQLiteDatabase mDb = mDbHelper.getReadableDatabase();
+        String[] projection = {
+                NoteEntry._ID,
+                NoteEntry.COLUMN_NAME_CONTENT,
+                NoteEntry.COLUMN_NAME_UPDATE_DATE
+        };
+        String selection = NoteEntry._ID + "=?";
+        String[] selectionArgs = {id};
+        mCursor = mDb.query(
+                NoteEntry.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                null
+        );
+        mCursor.moveToFirst();
+        note.set_ID(id);
+        note.setContent(mCursor.getString(mCursor.getColumnIndex(NoteEntry.COLUMN_NAME_CONTENT)));
+        long time = (mCursor.getLong((mCursor.getColumnIndex(NoteEntry.COLUMN_NAME_UPDATE_DATE))));
+        Calendar cl = Calendar.getInstance();
+        cl.setTimeInMillis(time);
+        note.setUpdate_time(Integer.toString(cl.get(Calendar.YEAR)) + "年" + Integer.toString(cl.get(Calendar.MONTH) + 1) + "月" + Integer.toString(cl.get(Calendar.DAY_OF_MONTH)) + "日" + " "
+                + Integer.toString(cl.get(Calendar.HOUR_OF_DAY)) + ":" + Integer.toString(cl.get(Calendar.MINUTE)) + ":" + Integer.toString(cl.get(Calendar.SECOND)));
+        this.note = note;
+        return note;
     }
 
     private void saveData(String content) {
@@ -98,9 +142,17 @@ public class EditeNoteFragment extends Fragment {
         ContentValues values = new ContentValues();
         values.put(NoteEntry.COLUMN_NAME_CONTENT, content);
         values.put(NoteEntry.COLUMN_NAME_UPDATE_DATE,(new Date()).getTime());
-        mDb.insert(NoteEntry.TABLE_NAME, null, values);
+        if(note == null){
+            mDb.insert(NoteEntry.TABLE_NAME, null, values);
+        }else{
+            String whereClause = NoteEntry._ID + "=?";
+            String[] whereArgs = {note.get_ID()};
+            mDb.update(NoteEntry.TABLE_NAME,values,whereClause,whereArgs);
+        }
         mDb.close();
     }
+
+
 
     //get current time, string type
     private String currentTime(){
