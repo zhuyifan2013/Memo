@@ -31,48 +31,30 @@ import static our.memo.data.NoteDataContract.NoteEntry;
 public class EditeNoteFragment extends Fragment {
     private Activity mContext;
     private View view;
-    private  NoteItem note = null;
+    private NoteItem note = null;
 
     public static EditeNoteFragment newInstance() {
         return new EditeNoteFragment();
     }
 
-    public EditeNoteFragment() {}
+    public EditeNoteFragment() {
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v("memo","fragment onCreate ");
+        Log.v("memo", "fragment onCreate ");
         mContext = getActivity();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.v("memo","fragment onPause");
-        EditText eText = (EditText)view.findViewById(R.id.edit_text_note);
+        Log.v("memo", "fragment onPause");
+        EditText eText = (EditText) view.findViewById(R.id.edit_text_note);
         String content = eText.getText().toString();
-        if(!"".equals(content))
+        if (!"".equals(content))
             saveData(content);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.v("memo", "fragment onStop");
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Log.v("memo","fragment onDestroyview");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.v("memo","fragment onDestroy");
-
     }
 
     @Override
@@ -81,9 +63,9 @@ public class EditeNoteFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-        Log.v("memo","fragment onCreateView");
-        view = inflater.inflate(R.layout.edit_note_fragment,container,false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.v("memo", "fragment onCreateView");
+        view = inflater.inflate(R.layout.edit_note_fragment, container, false);
         init(view);
         return view;
 
@@ -91,9 +73,9 @@ public class EditeNoteFragment extends Fragment {
 
     public void init(View view) {
         Bundle bundle = mContext.getIntent().getExtras();
-        TextView text_date = (TextView)view.findViewById(R.id.current_date);
-        TextView text_content = (TextView)view.findViewById(R.id.edit_text_note);
-        if(bundle == null){
+        TextView text_date = (TextView) view.findViewById(R.id.current_date);
+        TextView text_content = (TextView) view.findViewById(R.id.edit_text_note);
+        if (bundle == null) {
             text_date.setText(currentTime());
         } else {
             String id = bundle.getString(NoteEntry._ID);
@@ -141,21 +123,20 @@ public class EditeNoteFragment extends Fragment {
         SQLiteDatabase mDb = mDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(NoteEntry.COLUMN_NAME_CONTENT, content);
-        values.put(NoteEntry.COLUMN_NAME_UPDATE_DATE,(new Date()).getTime());
-        if(note == null){
+        values.put(NoteEntry.COLUMN_NAME_UPDATE_DATE, (new Date()).getTime());
+        if (note == null) {
             mDb.insert(NoteEntry.TABLE_NAME, null, values);
-        }else{
+        } else {
             String whereClause = NoteEntry._ID + "=?";
             String[] whereArgs = {note.get_ID()};
-            mDb.update(NoteEntry.TABLE_NAME,values,whereClause,whereArgs);
+            mDb.update(NoteEntry.TABLE_NAME, values, whereClause, whereArgs);
         }
         mDb.close();
     }
 
 
-
     //get current time, string type
-    private String currentTime(){
+    private String currentTime() {
         Date date = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat(
                 "yyyy年MM月dd日 HH:mm:ss", Locale.getDefault());

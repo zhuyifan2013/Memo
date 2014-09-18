@@ -3,6 +3,7 @@
     <string name="app_name">memo</string>
 
     <string name="add_new_note">Add new note</string>
+    <string name="delete_note">Delete</string>
 
     <!-- editor相关 -->
     <string name="edit_text_note_hint">Writing something</string>
