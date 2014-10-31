@@ -25,11 +25,6 @@ import java.util.Map;
 
 import our.memo.R;
 
-/**
- * Created by yifan on 14-9-18.
- * Email: zhuyifan@xiaomi.com
- */
-
 public class SwipeLayout extends FrameLayout {
 
     private ViewDragHelper mDragHelper;
@@ -86,7 +81,6 @@ public class SwipeLayout extends FrameLayout {
     public SwipeLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
-
 
     public SwipeLayout(Context context) {
         super(context);
@@ -714,5 +708,3 @@ public class SwipeLayout extends FrameLayout {
         public void onHandRelease(SwipeLayout layout, float xvel, float yvel);
     }
 }
-
-
