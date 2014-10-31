@@ -1,8 +1,5 @@
 package our.memo.SwipeListview;
 
-/**
- * Created by yifan on 14-10-29.
- */
 public class SimpleSwipeListener implements SwipeLayout.SwipeListener {
     @Override
     public void onStartOpen(SwipeLayout layout) {

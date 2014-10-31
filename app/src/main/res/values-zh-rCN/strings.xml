@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">memo</string>
+    <string name="app_name">Memo</string>
 
     <string name="add_new_note">新建笔记</string>
     <string name="delete_note">删除</string>

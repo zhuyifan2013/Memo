@@ -25,11 +25,6 @@ import java.util.Map;
 
 import our.memo.R;
 
-/**
- * Created by yifan on 14-9-18.
- * Email: zhuyifan@xiaomi.com
- */
-
 public class SwipeLayout extends FrameLayout {
 
     private ViewDragHelper mDragHelper;
@@ -86,7 +81,6 @@ public class SwipeLayout extends FrameLayout {
     public SwipeLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
-
 
     public SwipeLayout(Context context) {
         super(context);
@@ -654,6 +648,7 @@ public class SwipeLayout extends FrameLayout {
             case MotionEvent.ACTION_CANCEL:
                 mTouchConsumedByChild = false;
         }
+        if(mTouchConsumedByChild) return false;
         return mDragHelper.shouldInterceptTouchEvent(ev);
     }
 
@@ -686,7 +681,8 @@ public class SwipeLayout extends FrameLayout {
 
         if(event.getRawX() > left && event.getRawX() < left + v.getWidth()
                 && event.getRawY() > top && event.getRawY() < top + v.getHeight()){
-            return v.onTouchEvent(event);
+            boolean res =  v.onTouchEvent(event) ;
+            return res;
         }
 
         return false;
@@ -714,5 +710,3 @@ public class SwipeLayout extends FrameLayout {
         public void onHandRelease(SwipeLayout layout, float xvel, float yvel);
     }
 }
-
-

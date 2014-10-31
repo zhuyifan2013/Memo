@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <style name="Theme.Memo.Light" parent="@android:style/Theme.Holo.Light">
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:actionBarStyle">@style/Theme.Memo.ActionBar</item>
+    </style>
 
+    <style name="Theme.Memo.ActionBar" parent="android:Widget.ActionBar">
+        <item name="android:titleTextStyle">@style/Theme.Memo.ActionBar.TitleTextStyle</item>
+    </style>
+    <style name="Theme.Memo.ActionBar.TitleTextStyle" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">#000000</item>
+    </style>
 </resources>

@@ -2,136 +2,131 @@ package our.memo.editor;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
-
-import our.memo.R;
-import our.memo.data.NoteDbHelper;
-import our.memo.data.NoteItem;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-import static our.memo.data.NoteDataContract.NoteEntry;
+import our.memo.R;
+import our.memo.data.NoteDatabase;
+import our.memo.data.NoteDbHelper;
+import our.memo.data.NoteItem;
 
-/**
- * Created by yifan on 14-9-3.
- * E-mail: zhuyifan@xiaomi.com
- */
 public class EditeNoteFragment extends Fragment {
+
     private Activity mContext;
-    private View view;
-    private NoteItem note = null;
+
+    private TextView mContentView;
+    private TextView mDateView;
+
+    private NoteItem mNote;
 
     public static EditeNoteFragment newInstance() {
         return new EditeNoteFragment();
     }
 
-    public EditeNoteFragment() {
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.v("memo", "fragment onCreate ");
         mContext = getActivity();
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        Log.v("memo", "fragment onPause");
-        EditText eText = (EditText) view.findViewById(R.id.edit_text_note);
-        String content = eText.getText().toString();
-        if (!"".equals(content))
-            saveData(content);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.edit_note_fragment, container, false);
+        mContentView = (TextView) view.findViewById(R.id.content);
+        mDateView = (TextView) view.findViewById(R.id.date);
+        return view;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Bundle bundle = mContext.getIntent().getExtras();
+        if (bundle == null) {
+            mDateView.setText(currentTime());
+        } else {
+            QueryNoteTask queryNoteTask = new QueryNoteTask();
+            int id = bundle.getInt(NoteDatabase.NoteTable._ID);
+            queryNoteTask.execute(id);
+        }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.v("memo", "fragment onCreateView");
-        view = inflater.inflate(R.layout.edit_note_fragment, container, false);
-        init(view);
-        return view;
-
-    }
-
-    public void init(View view) {
-        Bundle bundle = mContext.getIntent().getExtras();
-        TextView text_date = (TextView) view.findViewById(R.id.current_date);
-        TextView text_content = (TextView) view.findViewById(R.id.edit_text_note);
-        if (bundle == null) {
-            text_date.setText(currentTime());
-        } else {
-            String id = bundle.getString(NoteEntry._ID);
-            NoteItem note = getData(id);
-            text_date.setText(note.getUpdate_time());
-            text_content.setText(note.getContent());
+    public void onPause() {
+        String content = mContentView.getText().toString();
+        if (!"".equals(content)) {
+            saveData(content);
         }
+        super.onPause();
     }
 
-    private NoteItem getData(String id) {
-        Cursor mCursor;
-        NoteItem note = new NoteItem();
-        NoteDbHelper mDbHelper = new NoteDbHelper(mContext);
-        SQLiteDatabase mDb = mDbHelper.getReadableDatabase();
-        String[] projection = {
-                NoteEntry._ID,
-                NoteEntry.COLUMN_NAME_CONTENT,
-                NoteEntry.COLUMN_NAME_UPDATE_DATE
-        };
-        String selection = NoteEntry._ID + "=?";
-        String[] selectionArgs = {id};
-        mCursor = mDb.query(
-                NoteEntry.TABLE_NAME,
-                projection,
-                selection,
-                selectionArgs,
-                null,
-                null,
-                null
-        );
-        mCursor.moveToFirst();
-        note.set_ID(id);
-        note.setContent(mCursor.getString(mCursor.getColumnIndex(NoteEntry.COLUMN_NAME_CONTENT)));
-        long time = (mCursor.getLong((mCursor.getColumnIndex(NoteEntry.COLUMN_NAME_UPDATE_DATE))));
-        Calendar cl = Calendar.getInstance();
-        cl.setTimeInMillis(time);
-        note.setUpdate_time(Integer.toString(cl.get(Calendar.YEAR)) + "年" + Integer.toString(cl.get(Calendar.MONTH) + 1) + "月" + Integer.toString(cl.get(Calendar.DAY_OF_MONTH)) + "日" + " "
-                + Integer.toString(cl.get(Calendar.HOUR_OF_DAY)) + ":" + Integer.toString(cl.get(Calendar.MINUTE)) + ":" + Integer.toString(cl.get(Calendar.SECOND)));
-        this.note = note;
-        return note;
+    private class QueryNoteTask extends AsyncTask<Integer, Void, NoteItem> {
+
+        @Override
+        protected NoteItem doInBackground(Integer... params) {
+            NoteItem noteItem = new NoteItem();
+            Uri uri = ContentUris.withAppendedId(NoteDatabase.CONTENT_URI_NOTE, params[0]);
+            long time = 0;
+            Cursor cursor = null;
+            try {
+                cursor = getActivity().getContentResolver().query(uri, null, null, null, null,
+                        null);
+                if (cursor != null && cursor.moveToFirst()) {
+                    noteItem.setContent(cursor.getString(cursor.getColumnIndex(NoteDatabase
+                            .NoteTable
+                            .CONTENT)));
+                    time = cursor.getLong((cursor.getColumnIndex(NoteDatabase.NoteTable
+                            .UPDATE_DATE)));
+                }
+            } finally {
+                if (cursor != null) {
+                    cursor.close();
+                }
+            }
+            Calendar cl = Calendar.getInstance();
+            cl.setTimeInMillis(time);
+            noteItem.setUpdateTime(Integer.toString(cl.get(Calendar.YEAR)) + "年" + Integer
+                    .toString(cl
+                            .get(Calendar.MONTH) + 1) + "月" + Integer.toString(cl.get(Calendar
+                    .DAY_OF_MONTH))
+                    + "日" + " "
+                    + Integer.toString(cl.get(Calendar.HOUR_OF_DAY)) + ":" + Integer.toString(cl.get
+                    (Calendar.MINUTE)) + ":" + Integer.toString(cl.get(Calendar.SECOND)));
+            return noteItem;
+        }
+
+        @Override
+        protected void onPostExecute(NoteItem noteItem) {
+            mNote = noteItem;
+            mContentView.setText(noteItem.getContent());
+            mDateView.setText(noteItem.getUpdateTime());
+        }
     }
 
     private void saveData(String content) {
-        NoteDbHelper mDbHelper = new NoteDbHelper(mContext);
-        SQLiteDatabase mDb = mDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(NoteEntry.COLUMN_NAME_CONTENT, content);
-        values.put(NoteEntry.COLUMN_NAME_UPDATE_DATE, (new Date()).getTime());
-        if (note == null) {
-            mDb.insert(NoteEntry.TABLE_NAME, null, values);
+        values.put(NoteDatabase.NoteTable.CONTENT, content);
+        values.put(NoteDatabase.NoteTable.UPDATE_DATE, (new Date()).getTime());
+        if (mNote == null) {
+            mContext.getContentResolver().insert(NoteDatabase.CONTENT_URI_NOTE, values);
         } else {
-            String whereClause = NoteEntry._ID + "=?";
-            String[] whereArgs = {note.get_ID()};
-            mDb.update(NoteEntry.TABLE_NAME, values, whereClause, whereArgs);
+            Uri uri = ContentUris.withAppendedId(NoteDatabase.CONTENT_URI_NOTE, mNote.getID());
+            mContext.getContentResolver().update(uri, values, null, null);
         }
-        mDb.close();
     }
 
 
