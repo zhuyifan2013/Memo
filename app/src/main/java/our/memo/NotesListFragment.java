@@ -95,6 +95,7 @@ public class NotesListFragment extends Fragment {
             NoteItem noteItem = (NoteItem) parent.getItemAtPosition(position);
             LinearLayout deleteLayout = (LinearLayout) view.findViewById(R.id.bottom);
             deleteLayout.setOnClickListener(mDeleteListener);
+
             Intent intent = new Intent(mContext, EditNoteActivity.class);
             intent.putExtra(NoteDatabase.NoteTable._ID, noteItem.getID());
             startActivity(intent);

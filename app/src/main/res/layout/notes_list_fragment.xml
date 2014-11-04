@@ -5,9 +5,11 @@
               android:fitsSystemWindows="true"
               android:layout_width="match_parent"
               android:layout_height="match_parent">
-        <ListView
-                android:id="@+id/notes_list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-        </ListView>
+
+    <ListView
+        android:id="@+id/notes_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:descendantFocusability="afterDescendants">
+    </ListView>
 </LinearLayout>

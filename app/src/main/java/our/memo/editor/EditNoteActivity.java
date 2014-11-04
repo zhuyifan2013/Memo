@@ -31,7 +31,7 @@ public class EditNoteActivity extends Activity {
         SystemBarTintManager tintManager = new SystemBarTintManager(this);
         tintManager.setStatusBarTintEnabled(true);
         tintManager.setNavigationBarTintEnabled(true);
-        tintManager.setTintColor(Color.parseColor("#BDC0BA"));
+        tintManager.setTintColor(Color.parseColor(getString(R.string.actionbar_color)));
         ActionBar actionBar = getActionBar();
         if (actionBar != null) {
             actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.actionbar_bg));

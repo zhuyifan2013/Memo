@@ -91,6 +91,8 @@ public class EditeNoteFragment extends Fragment {
                             .CONTENT)));
                     time = cursor.getLong((cursor.getColumnIndex(NoteDatabase.NoteTable
                             .UPDATE_DATE)));
+                    noteItem.setID(cursor.getInt(cursor.getColumnIndex(NoteDatabase.NoteTable
+                            ._ID)));
                 }
             } finally {
                 if (cursor != null) {
