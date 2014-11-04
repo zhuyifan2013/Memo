@@ -3,6 +3,7 @@ package our.memo.SwipeListview;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
@@ -94,7 +95,6 @@ public class SwipeLayout extends FrameLayout {
         } else {
             mDragDistance = getBottomView().getMeasuredHeight();
         }
-        Log.i("hello", "drag distance is " + mDragDistance);
     }
 
 //    @Override
@@ -144,7 +144,6 @@ public class SwipeLayout extends FrameLayout {
 
     private void safeBottomView() {
         Status status = getOpenStatus();
-        Log.i("hello", "status: " + status.toString());
         ViewGroup bottom = getBottomView();
 
         if (status == Status.Close) {
@@ -169,7 +168,7 @@ public class SwipeLayout extends FrameLayout {
 
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
-            return child == getSurfaceView() || child == getBottomView();
+            return child == getSurfaceView();
         }
 
 
@@ -283,6 +282,7 @@ public class SwipeLayout extends FrameLayout {
         @Override
         public void onViewReleased(View releasedChild, float xvel, float yvel) {
             super.onViewReleased(releasedChild, xvel, yvel);
+            Log.i("hello", "x = " + xvel + " y = " + yvel);
             if (releasedChild == getSurfaceView()) {
                 processSurfaceRelease(xvel, yvel);
             } else if (releasedChild == getBottomView()) {
@@ -348,6 +348,7 @@ public class SwipeLayout extends FrameLayout {
 
     private void processSurfaceRelease(float xvel, float yvel) {
         if (xvel == 0 && getOpenStatus() == Status.Middle) {
+            Log.i("hello", "ready close! 1");
             close();
         }
         if (mDragEdge == DragEdge.Left || mDragEdge == DragEdge.Right) {
@@ -357,10 +358,13 @@ public class SwipeLayout extends FrameLayout {
                 } else {
                     close();
                 }
-            } else if (mDragEdge == DragEdge.Left) {
-                close();
-            } else {
-                open();
+            }
+            if (xvel < 0) {
+                if (mDragEdge == DragEdge.Left) {
+                    close();
+                } else {
+                    open();
+                }
             }
 
         } else {
@@ -370,10 +374,13 @@ public class SwipeLayout extends FrameLayout {
                 } else {
                     close();
                 }
-            } else if (mDragEdge == DragEdge.Top) {
-                close();
-            } else {
-                open();
+            }
+            if (yvel < 0) {
+                if (mDragEdge == DragEdge.Top) {
+                    close();
+                } else {
+                    open();
+                }
             }
         }
     }
@@ -419,7 +426,6 @@ public class SwipeLayout extends FrameLayout {
 
         if (yvel > 0 && mDragEdge == DragEdge.Top) t += mDragDistance;
         if (yvel < 0 && mDragEdge == DragEdge.Bottom) t -= mDragDistance;
-        Log.i("hello", "should process");
         mDragHelper.smoothSlideViewTo(getSurfaceView(), l, t);
         invalidate();
     }
@@ -433,12 +439,8 @@ public class SwipeLayout extends FrameLayout {
     }
 
     public void open(boolean smooth, boolean notify) {
-        ViewGroup surface = getSurfaceView(), bottom = getBottomView();
-        int dx, dy;
         Rect rect = computeSurfaceLayoutArea(true);
-        if (smooth) {
-            mDragHelper.smoothSlideViewTo(getSurfaceView(), rect.left, rect.top);
-        }
+        mDragHelper.smoothSlideViewTo(getSurfaceView(), rect.left, rect.top);
         invalidate();
     }
 
@@ -451,11 +453,8 @@ public class SwipeLayout extends FrameLayout {
     }
 
     public void close(boolean smooth, boolean notify) {
-        ViewGroup surface = getSurfaceView();
-        int dx, dy;
-        if (smooth) {
-            mDragHelper.smoothSlideViewTo(getSurfaceView(), getPaddingLeft(), getPaddingTop());
-        }
+        Log.i("hello", "close!");
+        mDragHelper.smoothSlideViewTo(getSurfaceView(), getPaddingLeft(), getPaddingTop());
         invalidate();
     }
 
@@ -517,115 +516,21 @@ public class SwipeLayout extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
-        int action = event.getActionMasked();
-        ViewParent parent = getParent();
-
-        gestureDetector.onTouchEvent(event);
-        Status status = getOpenStatus();
-        ViewGroup touching = null;
-        if (status == Status.Close) {
-            touching = getSurfaceView();
-        } else if (status == Status.Open) {
-            touching = getBottomView();
-        }
+        final int action = event.getActionMasked();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 mDragHelper.processTouchEvent(event);
-                parent.requestDisallowInterceptTouchEvent(true);
-
-                sX = event.getRawX();
-                sY = event.getRawY();
-
-                if (touching != null)
-                    touching.setPressed(true);
-
+                getParent().requestDisallowInterceptTouchEvent(true);
                 return true;
-            case MotionEvent.ACTION_MOVE: {
-                if (sX == -1 || sY == -1) {
-                    // Trick:
-                    // When in nested mode, we need to send a constructed ACTION_DOWN MotionEvent
-                    // to mDragHelper, to help
-                    // it initialize itself.
-                    event.setAction(MotionEvent.ACTION_DOWN);
-                    mDragHelper.processTouchEvent(event);
-                    parent.requestDisallowInterceptTouchEvent(true);
-                    sX = event.getRawX();
-                    sY = event.getRawY();
-                    return true;
-                }
-
-                float distanceX = event.getRawX() - sX;
-                float distanceY = event.getRawY() - sY;
-                float angle = Math.abs(distanceY / distanceX);
-                angle = (float) Math.toDegrees(Math.atan(angle));
-
-                boolean doNothing = false;
-                if (mDragEdge == DragEdge.Right) {
-                    boolean suitable = (status == Status.Open && distanceX > 0) || (status ==
-                            Status.Close && distanceX < 0);
-                    suitable = suitable || (status == Status.Middle);
-
-                    if (angle > 30 || !suitable) {
-                        doNothing = true;
-                    }
-                }
-
-                if (mDragEdge == DragEdge.Left) {
-                    boolean suitable = (status == Status.Open && distanceX < 0) || (status ==
-                            Status.Close && distanceX > 0);
-                    suitable = suitable || status == Status.Middle;
-
-                    if (angle > 30 || !suitable) {
-                        doNothing = true;
-                    }
-                }
-
-                if (mDragEdge == DragEdge.Top) {
-                    boolean suitable = (status == Status.Open && distanceY < 0) || (status ==
-                            Status.Close && distanceY > 0);
-                    suitable = suitable || status == Status.Middle;
-
-                    if (angle < 60 || !suitable) {
-                        doNothing = true;
-                    }
-                }
-
-                if (mDragEdge == DragEdge.Bottom) {
-                    boolean suitable = (status == Status.Open && distanceY > 0) || (status ==
-                            Status.Close && distanceY < 0);
-                    suitable = suitable || status == Status.Middle;
-
-                    if (angle < 60 || !suitable) {
-                        doNothing = true;
-                    }
-                }
-
-                if (doNothing) {
-                    parent.requestDisallowInterceptTouchEvent(false);
-                    return false;
-                } else {
-                    if (touching != null) {
-                        touching.setPressed(false);
-                    }
-                    parent.requestDisallowInterceptTouchEvent(true);
-                    mDragHelper.processTouchEvent(event);
-                }
-                break;
-            }
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL: {
-                sX = -1;
-                sY = -1;
-                if (touching != null) {
-                    touching.setPressed(false);
-                }
-            }
-            default:
-                parent.requestDisallowInterceptTouchEvent(true);
+            case MotionEvent.ACTION_MOVE:
                 mDragHelper.processTouchEvent(event);
-        }
+                getParent().requestDisallowInterceptTouchEvent(true);
+                return true;
+            case
 
+        }
+        getParent().requestDisallowInterceptTouchEvent(true);
+        mDragHelper.processTouchEvent(event);
         return true;
     }
 
@@ -633,7 +538,7 @@ public class SwipeLayout extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        int action = ev.getActionMasked();
+        final int action = MotionEventCompat.getActionMasked(ev);
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 Status status = getOpenStatus();

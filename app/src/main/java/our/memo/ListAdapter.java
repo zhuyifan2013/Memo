@@ -35,7 +35,7 @@ public class ListAdapter extends SwipeLayoutAdapter {
     @Override
     public View generateView(int position, ViewGroup parent) {
         View v = LayoutInflater.from(mContext).inflate(R.layout.note_item, null);
-        mSwipeLayout = (SwipeLayout)v.findViewById(getSwipeLayoutResId(position));
+        mSwipeLayout = (SwipeLayout) v.findViewById(getSwipeLayoutResId(position));
         return v;
     }
 
