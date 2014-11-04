@@ -3,12 +3,13 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent">
 
+
     <our.memo.SwipeListview.SwipeLayout
         android:id="@+id/swipe"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
+        <LinearLayoutgit 
             android:id="@+id/bottom"
             android:background="#66ddff00"
             android:gravity="center"
