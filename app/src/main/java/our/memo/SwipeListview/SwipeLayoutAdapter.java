@@ -7,10 +7,6 @@ import android.widget.BaseAdapter;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Created by yifan on 14-9-18.
- * Email: zhuyifan@xiaomi.com
- */
 public abstract class SwipeLayoutAdapter extends BaseAdapter {
 
     public static enum Mode {
@@ -55,11 +51,10 @@ public abstract class SwipeLayoutAdapter extends BaseAdapter {
         return v;
     }
 
-    public void setMode(Mode mode){
+    public void setMode(Mode mode) {
         mOpenPositions.clear();
         mOpenPosition = INVALID_POSITION;
         this.mode = mode;
-        //notifyDataSetChanged();
     }
 
     public abstract int getSwipeLayoutResId(int position);
@@ -68,18 +63,4 @@ public abstract class SwipeLayoutAdapter extends BaseAdapter {
 
     public abstract void fillValues(int position, View convertView);
 
-    class SwipeMemory extends SimpleSwipeListener {
-        private int postion;
-
-        SwipeMemory(int postion) {
-            this.postion = postion;
-        }
-
-//        @Override
-//        public void onClose(SwipeLayout layout) {
-//            if (mode == Mode.Multiple) {
-//
-//            }
-//        }
-    }
 }

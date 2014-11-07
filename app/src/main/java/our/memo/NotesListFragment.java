@@ -1,35 +1,33 @@
 package our.memo;
 
 import android.app.Fragment;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.Toast;
-
-import our.memo.SwipeListview.SwipeLayoutAdapter;
-import our.memo.data.NoteDatabase;
-import our.memo.editor.EditNoteActivity;
-import our.memo.data.NoteDbHelper;
-import our.memo.data.NoteItem;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+
+import our.memo.data.NoteDatabase;
+import our.memo.data.NoteItem;
+import our.memo.editor.EditNoteActivity;
 
 public class NotesListFragment extends Fragment {
 
     private Context mContext;
 
     private ListView mNoteList;
+    private ListAdapter mListAdapter;
 
     private ArrayList<NoteItem> mNoteArray = new ArrayList<NoteItem>();
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -49,11 +47,10 @@ public class NotesListFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         initListView();
-        ListAdapter mAdapter = new ListAdapter(mNoteArray, mContext);
-        mAdapter.setMode(SwipeLayoutAdapter.Mode.Single);
-        mNoteList.setAdapter(mAdapter);
-        mNoteList.setOnItemClickListener(mOnItemClickListener);
-        mAdapter.notifyDataSetChanged();
+        mListAdapter = new ListAdapter(mNoteArray, mContext);
+        mListAdapter.setItemClickListener(mItemClickListener);
+        mNoteList.setAdapter(mListAdapter);
+        mListAdapter.notifyDataSetChanged();
     }
 
     private void initListView() {
@@ -88,24 +85,22 @@ public class NotesListFragment extends Fragment {
         }
     }
 
-    private AdapterView.OnItemClickListener mOnItemClickListener = new AdapterView
-            .OnItemClickListener() {
+    private ListAdapter.ItemClickListener mItemClickListener = new ListAdapter.ItemClickListener() {
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            NoteItem noteItem = (NoteItem) parent.getItemAtPosition(position);
-            LinearLayout deleteLayout = (LinearLayout) view.findViewById(R.id.bottom);
-            deleteLayout.setOnClickListener(mDeleteListener);
-
+        public void itemListener(int position) {
+            NoteItem noteItem = (NoteItem) mListAdapter.getItem(position);
             Intent intent = new Intent(mContext, EditNoteActivity.class);
             intent.putExtra(NoteDatabase.NoteTable._ID, noteItem.getID());
             startActivity(intent);
         }
-    };
 
-    View.OnClickListener mDeleteListener = new View.OnClickListener() {
         @Override
-        public void onClick(View v) {
-            Toast.makeText(mContext, "删除笔记", Toast.LENGTH_SHORT).show();
+        public void deleteListener(int position) {
+            NoteItem noteItem = (NoteItem) mListAdapter.getItem(position);
+            Uri uri = ContentUris.withAppendedId(NoteDatabase.CONTENT_URI_NOTE, noteItem.getID());
+            mContext.getContentResolver().delete(uri, null, null);
+            mNoteArray.remove(position);
+            mListAdapter.notifyDataSetChanged();
         }
     };
 }

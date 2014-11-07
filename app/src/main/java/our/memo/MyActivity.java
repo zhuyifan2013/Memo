@@ -20,7 +20,6 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.homepage);
         initActionBar();
-
     }
 
     @Override
@@ -32,7 +31,6 @@ public class MyActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-
         switch (item.getItemId()) {
             case R.id.action_add:
                 Intent intent = new Intent(this, EditNoteActivity.class);

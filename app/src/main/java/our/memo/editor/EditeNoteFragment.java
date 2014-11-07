@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import java.util.Locale;
 
 import our.memo.R;
 import our.memo.data.NoteDatabase;
-import our.memo.data.NoteDbHelper;
 import our.memo.data.NoteItem;
 
 public class EditeNoteFragment extends Fragment {
@@ -130,7 +128,6 @@ public class EditeNoteFragment extends Fragment {
             mContext.getContentResolver().update(uri, values, null, null);
         }
     }
-
 
     //get current time, string type
     private String currentTime() {

@@ -3,26 +3,14 @@ package our.memo.SwipeListview;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
-import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
-import android.widget.ListAdapter;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import our.memo.R;
 
@@ -33,8 +21,6 @@ public class SwipeLayout extends FrameLayout {
     private int mDragDistance = 0;
     private DragEdge mDragEdge;
     private ShowMode mShowMode;
-
-    private List<SwipeListener> mSwipeListeners = new ArrayList<SwipeListener>();
 
     public static enum ShowMode {
         LayDown, PullOut
@@ -97,11 +83,6 @@ public class SwipeLayout extends FrameLayout {
         }
     }
 
-//    @Override
-//    public boolean onInterceptTouchEvent(MotionEvent ev) {
-//        return mDragHelper.shouldInterceptTouchEvent(ev);
-//    }
-
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         int childCount = getChildCount();
@@ -112,26 +93,10 @@ public class SwipeLayout extends FrameLayout {
             throw new IllegalArgumentException("The 2 children in SwipeLayout must be an instance" +
                     " of ViewGroup");
         }
-
-        if (mShowMode == ShowMode.PullOut)
-            layoutPullOut();
-        else if (mShowMode == ShowMode.LayDown)
+        if (mShowMode == ShowMode.LayDown)
             layoutLayDown();
 
         safeBottomView();
-
-//        if(mOnLayoutListeners != null)
-//            for(int i = 0; i < mOnLayoutListeners.size(); i++){
-//                mOnLayoutListeners.get(i).onLayout(this);
-//            }
-    }
-
-    void layoutPullOut() {
-        Rect rect = computeSurfaceLayoutArea(false);
-        getSurfaceView().layout(rect.left, rect.top, rect.right, rect.bottom);
-        rect = computeBottomLayoutAreaViaSurface(ShowMode.PullOut, rect);
-        getBottomView().layout(rect.left, rect.top, rect.right, rect.bottom);
-        bringChildToFront(getSurfaceView());
     }
 
     void layoutLayDown() {
@@ -286,9 +251,7 @@ public class SwipeLayout extends FrameLayout {
             if (releasedChild == getSurfaceView()) {
                 processSurfaceRelease(xvel, yvel);
             } else if (releasedChild == getBottomView()) {
-                if (getShowMode() == ShowMode.PullOut) {
-                    processBottomPullOutRelease(xvel, yvel);
-                } else if (getShowMode() == ShowMode.LayDown) {
+                if (getShowMode() == ShowMode.LayDown) {
                     processBottomLayDownMode(xvel, yvel);
                 }
             }
@@ -301,54 +264,8 @@ public class SwipeLayout extends FrameLayout {
         }
     };
 
-    private GestureDetector gestureDetector = new GestureDetector(getContext(),
-            new SwipeDetector());
-
-    class SwipeDetector extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onDown(MotionEvent e) {
-            return true;
-        }
-
-        /**
-         * Simulate the touch event lifecycle. If you use SwipeLayout in {@link android.widget
-         * .AdapterView}
-         * ({@link android.widget.ListView}, {@link android.widget.GridView} etc.) It will
-         * manually call
-         * {@link android.widget.AdapterView}.performItemClick, performItemLongClick.
-         *
-         * @param e
-         * @return
-         */
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            ViewParent t = getParent();
-            while (t != null) {
-                if (t instanceof AdapterView) {
-                    AdapterView view = (AdapterView) t;
-                    int p = view.getPositionForView(SwipeLayout.this);
-                    if (p != AdapterView.INVALID_POSITION &&
-                            view.performItemClick(view.getChildAt(p), p,
-                                    view.getAdapter().getItemId(p)))
-                        return true;
-                } else {
-                    if (t instanceof View && ((View) t).performClick())
-                        return true;
-                }
-                t = t.getParent();
-            }
-            return false;
-        }
-
-        @Override
-        public void onLongPress(MotionEvent e) {
-            performLongClick();
-        }
-    }
-
     private void processSurfaceRelease(float xvel, float yvel) {
         if (xvel == 0 && getOpenStatus() == Status.Middle) {
-            Log.i("hello", "ready close! 1");
             close();
         }
         if (mDragEdge == DragEdge.Left || mDragEdge == DragEdge.Right) {
@@ -384,38 +301,9 @@ public class SwipeLayout extends FrameLayout {
             }
         }
     }
-
-    private void processBottomPullOutRelease(float xvel, float yvel) {
-
-        if (xvel == 0 && getOpenStatus() == Status.Middle)
-            close();
-
-        if (mDragEdge == DragEdge.Left || mDragEdge == DragEdge.Right) {
-            if (xvel > 0) {
-                if (mDragEdge == DragEdge.Left) open();
-                else close();
-            }
-            if (xvel < 0) {
-                if (mDragEdge == DragEdge.Left) close();
-                else open();
-            }
-        } else {
-            if (yvel > 0) {
-                if (mDragEdge == DragEdge.Top) open();
-                else close();
-            }
-
-            if (yvel < 0) {
-                if (mDragEdge == DragEdge.Top) close();
-                else open();
-            }
-        }
-    }
-
 
     //TODO 测试为空时候的情况  加深题解
     private void processBottomLayDownMode(float xvel, float yvel) {
-
         if (xvel == 0 && getOpenStatus() == Status.Middle)
             close();
 
@@ -453,7 +341,6 @@ public class SwipeLayout extends FrameLayout {
     }
 
     public void close(boolean smooth, boolean notify) {
-        Log.i("hello", "close!");
         mDragHelper.smoothSlideViewTo(getSurfaceView(), getPaddingLeft(), getPaddingTop());
         invalidate();
     }
@@ -470,21 +357,21 @@ public class SwipeLayout extends FrameLayout {
     }
 
     private Rect computeBottomLayoutAreaViaSurface(ShowMode mode, Rect surfaceArea) {
-        Rect rect = surfaceArea;
 
-        int bl = rect.left, bt = rect.top, br = rect.right, bb = rect.bottom;
+        int bl = surfaceArea.left, bt = surfaceArea.top, br = surfaceArea.right,
+                bb = surfaceArea.bottom;
         if (mode == ShowMode.PullOut) {
-            if (mDragEdge == DragEdge.Left) bl = rect.left - mDragDistance;
-            else if (mDragEdge == DragEdge.Right) bl = rect.right;
-            else if (mDragEdge == DragEdge.Top) bt = rect.top - mDragDistance;
-            else bt = rect.bottom;
+            if (mDragEdge == DragEdge.Left) bl = surfaceArea.left - mDragDistance;
+            else if (mDragEdge == DragEdge.Right) bl = surfaceArea.right;
+            else if (mDragEdge == DragEdge.Top) bt = surfaceArea.top - mDragDistance;
+            else bt = surfaceArea.bottom;
 
             if (mDragEdge == DragEdge.Left || mDragEdge == DragEdge.Right) {
-                bb = rect.bottom;
+                bb = surfaceArea.bottom;
                 br = bl + getBottomView().getMeasuredWidth();
             } else {
                 bb = bt + getBottomView().getMeasuredHeight();
-                br = rect.right;
+                br = surfaceArea.right;
             }
         } else if (mode == ShowMode.LayDown) {
             if (mDragEdge == DragEdge.Left) br = bl + mDragDistance;
@@ -494,8 +381,6 @@ public class SwipeLayout extends FrameLayout {
 
         }
         return new Rect(bl, bt, br, bb);
-
-
     }
 
     public Status getOpenStatus() {
@@ -512,86 +397,85 @@ public class SwipeLayout extends FrameLayout {
         return Status.Middle;
     }
 
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        return mDragHelper.shouldInterceptTouchEvent(ev);
+    }
+
     private float sX = -1, sY = -1;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                mDragHelper.processTouchEvent(event);
-                getParent().requestDisallowInterceptTouchEvent(true);
-                return true;
-            case MotionEvent.ACTION_MOVE:
-                mDragHelper.processTouchEvent(event);
-                getParent().requestDisallowInterceptTouchEvent(true);
-                return true;
-            case
-
+        Status status = getOpenStatus();
+        ViewGroup touching = null;
+        if (status == Status.Close) {
+            touching = getSurfaceView();
+        } else if (status == Status.Open) {
+            touching = getBottomView();
         }
-        getParent().requestDisallowInterceptTouchEvent(true);
-        mDragHelper.processTouchEvent(event);
-        return true;
-    }
 
-    private boolean mTouchConsumedByChild = false;
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        final int action = MotionEventCompat.getActionMasked(ev);
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                Status status = getOpenStatus();
-                if (status == Status.Close) {
-                    mTouchConsumedByChild = childNeedHandleTouchEvent(getSurfaceView(), ev) != null;
-                } else if (status == Status.Open) {
-                    mTouchConsumedByChild = childNeedHandleTouchEvent(getBottomView(), ev) != null;
+                mDragHelper.processTouchEvent(event);
+                getParent().requestDisallowInterceptTouchEvent(true);
+
+                sX = event.getRawX();
+                sY = event.getRawY();
+
+                if (touching != null) {
+                    touching.setPressed(true);
+                }
+                return true;
+
+            case MotionEvent.ACTION_MOVE:
+                if (sX == -1 || sY == -1) {
+                    event.setAction(MotionEvent.ACTION_DOWN);
+                    mDragHelper.processTouchEvent(event);
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                    sX = event.getRawX();
+                    sY = event.getRawY();
+                    return true;
+                }
+
+                float distanceX = event.getRawX() - sX;
+                float distanceY = event.getRawY() - sY;
+                float angle = Math.abs(distanceY / distanceX);
+                angle = (float) Math.toDegrees(Math.atan(angle));
+
+                boolean doNothing = false;
+                if (mDragEdge == DragEdge.Right) {
+                    boolean suitable = (status == Status.Open && distanceX > 0) || (status ==
+                            Status.Close && distanceX < 0);
+                    suitable = suitable || (status == Status.Middle);
+                    if (angle > 30 || !suitable) {
+                        doNothing = true;
+                    }
+                }
+                if (doNothing) {
+                    getParent().requestDisallowInterceptTouchEvent(false);
+                    return false;
+                } else {
+                    if (touching != null) {
+                        touching.setPressed(false);
+                    }
+                    getParent().requestDisallowInterceptTouchEvent(true);
+                    mDragHelper.processTouchEvent(event);
                 }
                 break;
             case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_CANCEL:
-                mTouchConsumedByChild = false;
-        }
-        if (mTouchConsumedByChild) {
-            return false;
-        }
-        return mDragHelper.shouldInterceptTouchEvent(ev);
-    }
-
-    private View childNeedHandleTouchEvent(ViewGroup v, MotionEvent event) {
-        if (v == null) return null;
-        if (v.onTouchEvent(event))
-            return v;
-
-        int childCount = v.getChildCount();
-        for (int i = childCount - 1; i >= 0; i--) {
-            View child = v.getChildAt(i);
-            if (child instanceof ViewGroup) {
-                View grandChild = childNeedHandleTouchEvent((ViewGroup) child, event);
-                if (grandChild != null)
-                    return grandChild;
-            } else {
-                if (childNeedHandleTouchEvent(v.getChildAt(i), event))
-                    return v.getChildAt(i);
+            case MotionEvent.ACTION_CANCEL: {
+                sX = -1;
+                sY = -1;
+                if (touching != null) {
+                    touching.setPressed(false);
+                }
             }
+            default:
+                getParent().requestDisallowInterceptTouchEvent(true);
+                mDragHelper.processTouchEvent(event);
         }
-        return null;
-    }
-
-    private boolean childNeedHandleTouchEvent(View v, MotionEvent event) {
-        if (v == null) return false;
-
-        int[] loc = new int[2];
-        v.getLocationOnScreen(loc);
-        int left = loc[0], top = loc[1];
-
-        if (event.getRawX() > left && event.getRawX() < left + v.getWidth()
-                && event.getRawY() > top && event.getRawY() < top + v.getHeight()) {
-            boolean res = v.onTouchEvent(event);
-            return res;
-        }
-
-        return false;
+        return true;
     }
 
     @Override
@@ -600,19 +484,5 @@ public class SwipeLayout extends FrameLayout {
         if (mDragHelper.continueSettling(true)) {
             ViewCompat.postInvalidateOnAnimation(this);
         }
-    }
-
-    public interface SwipeListener {
-        public void onStartOpen(SwipeLayout layout);
-
-        public void onOpen(SwipeLayout layout);
-
-        public void onStartClose(SwipeLayout layout);
-
-        public void onClose(SwipeLayout layout);
-
-        public void onUpdate(SwipeLayout layout, int leftOffset, int topOffset);
-
-        public void onHandRelease(SwipeLayout layout, float xvel, float yvel);
     }
 }
