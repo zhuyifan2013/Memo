@@ -6,9 +6,13 @@ import android.provider.BaseColumns;
 public final class NoteDatabase {
 
     public static final String TABLE_NOTE = "note";
+
+    //projection
     public static final String[] PROJECTION_CONTENT_AND_DATE = new String[]{
             NoteTable._ID, NoteTable.CONTENT, NoteTable.UPDATE_DATE
     };
+
+    //uri
     public static final Uri CONTENT_URI_NOTE = Uri.parse(NoteDbProvider.CONTENT_URI + "/note");
 
     public static abstract class NoteTable implements BaseColumns {

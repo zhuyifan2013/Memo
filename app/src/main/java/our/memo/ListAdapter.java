@@ -73,7 +73,7 @@ public class ListAdapter extends SwipeLayoutAdapter {
         //contentView.setTypeface(Typeface.createFromAsset(mContext.getAssets(),
         // "fonts/YueYuan.otf"));
         contentView.setText(mNoteArray.get(position).getContent());
-        updateTimeView.setText(mNoteArray.get(position).getUpdateTime());
+        updateTimeView.setText(Util.formatTime(Util.DATE_FORMAT_NOTE_ITEM,mNoteArray.get(position).getUpdateTime()));
     }
 
     public void setItemClickListener(ItemClickListener itemClickListener) {

@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
 import our.memo.R;
@@ -397,6 +398,21 @@ public class SwipeLayout extends FrameLayout {
         return Status.Middle;
     }
 
+    private boolean eventOccurInView(MotionEvent ev, View view){
+        return ev.getX() <= view.getRight() && ev.getX() >= view.getLeft() && ev.getY()
+                >= view.getTop() && ev.getY() <= view.getBottom();
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        Status status = getOpenStatus();
+        if(status == Status.Open && eventOccurInView(ev, getSurfaceView())){
+            close();
+            return true;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
+
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         return mDragHelper.shouldInterceptTouchEvent(ev);
@@ -407,6 +423,7 @@ public class SwipeLayout extends FrameLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
+        Log.i("hello", "SwipeLayout onTouchEvent action is : " + action);
         Status status = getOpenStatus();
         ViewGroup touching = null;
         if (status == Status.Close) {
@@ -417,6 +434,7 @@ public class SwipeLayout extends FrameLayout {
 
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                Log.i("hello", "SwipeLayout action down");
                 mDragHelper.processTouchEvent(event);
                 getParent().requestDisallowInterceptTouchEvent(true);
 
@@ -429,6 +447,7 @@ public class SwipeLayout extends FrameLayout {
                 return true;
 
             case MotionEvent.ACTION_MOVE:
+                Log.i("hello", "SwipeLayout action move");
                 if (sX == -1 || sY == -1) {
                     event.setAction(MotionEvent.ACTION_DOWN);
                     mDragHelper.processTouchEvent(event);
@@ -465,6 +484,7 @@ public class SwipeLayout extends FrameLayout {
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL: {
+                Log.i("hello", "SwipeLayout action up and cancel");
                 sX = -1;
                 sY = -1;
                 if (touching != null) {

@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent">
-    <fragment android:name="our.memo.NotesListFragment"
-            android:id="@+id/list_fragment"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent">
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <fragment
+        android:id="@+id/list_fragment"
+        android:name="our.memo.NotesListFragment"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
     </fragment>
 
-</LinearLayout>
-
+</FrameLayout>

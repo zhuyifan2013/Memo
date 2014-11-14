@@ -4,7 +4,9 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.util.Log;
+import android.view.MenuItem;
 
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
@@ -12,29 +14,26 @@ import our.memo.R;
 
 public class EditNoteActivity extends Activity {
 
-    private EditeNoteFragment mEditeNoteFragment;
-
+    private FinishListener mFinishListener;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_notes);
-        initActionbar();
-        mEditeNoteFragment = EditeNoteFragment.newInstance();
-        if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, mEditeNoteFragment)
-                    .commit();
-        }
     }
 
-    private void initActionbar() {
-        SystemBarTintManager tintManager = new SystemBarTintManager(this);
-        tintManager.setStatusBarTintEnabled(true);
-        tintManager.setNavigationBarTintEnabled(true);
-        tintManager.setTintColor(Color.parseColor(getString(R.string.actionbar_color)));
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setBackgroundDrawable(getResources().getDrawable(R.drawable.actionbar_bg));
-        }
+    @Override
+    public void finish() {
+        Log.i("hello", "ready finish");
+        mFinishListener.beforeFinish();
+        Log.i("hello", "after before finish");
+        super.finish();
+    }
+
+    public void setFinishListener(FinishListener finishListener) {
+        this.mFinishListener = finishListener;
+    }
+
+    public interface FinishListener{
+        public void beforeFinish();
     }
 }
